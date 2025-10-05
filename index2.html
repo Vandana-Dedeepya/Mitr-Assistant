@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floating Mitr - Assistant</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* Added emoji-friendly fonts for better icon rendering */
+            font-family: Arial, "Segoe UI Symbol", "Noto Color Emoji", sans-serif; 
+            background: url('./assets/temple.png') no-repeat center center fixed; 
+            background-size: cover;
+        }
+
+        /* Transparent overlay for readability */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.35); /* ~65% transparent */
+            z-index: -1;
+        }
+
+        /* Floating chat icon */
+        #chat-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #e6b800;
+            color: white;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px; 
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        #chat-icon:hover {
+            transform: scale(1.1);
+        }
+
+        /* Chat window */
+        #chat-window {
+            display: none; /* closed by default */
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            width: 320px;
+            height: 400px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #chat-header {
+            background: linear-gradient(90deg, #e6b800, #f2d14c);
+            color: #222;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #chat-messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            font-size: 14px;
+        }
+
+        .msg {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 8px;
+            max-width: 80%;
+            clear: both;
+            word-wrap: break-word;
+        }
+
+        .user { background: #0078d7; color: white; float: right; }
+        .bot { background: #f1f1f1; float: left; }
+        .bot a { color: #0078d7; font-weight: bold; text-decoration: none; }
+        .bot a:hover { text-decoration: underline; }
+
+        #chat-input {
+            display: flex;
+            border-top: 1px solid #ccc;
+        }
+        #chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+        #chat-input button {
+            padding: 10px;
+            border: none;
+            background: #0078d7;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div id="chat-icon">🛕</div>
+
+<div id="chat-window">
+    <div id="chat-header">Mitr - Assistant</div>
+    <div id="chat-messages"></div>
+    <div id="chat-input">
+        <input type="text" id="user-input" placeholder="Type a message...">
+        <button id="send-btn">Send</button>
+    </div>
+</div>
+
+<script>
+    const chatIcon = document.getElementById("chat-icon");
+    const chatWindow = document.getElementById("chat-window");
+    const chatMessages = document.getElementById("chat-messages");
+    const userInput = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
+
+    // Toggle chat window only when clicked
+    chatIcon.onclick = () => {
+        if (chatWindow.style.display === "none" || chatWindow.style.display === "") {
+            chatWindow.style.display = "flex";
+            // Greeting message cleaned of boxes
+            addMessage("🙏 Namaste! I am <b>Mitr</b> (मित्र) – your assistant.<br><br>"
+                        + "🌸 I provide live updates about 4 sacred temples:<br>"
+                        + "1. Somnath Jyotirlinga<br>"
+                        + "2. Dwarkadhish Temple<br>"
+                        + "3. Ambaji Temple<br>"
+                        + "4. Pavagadh Temple<br><br>"
+                        + "✨ Ask me about crowd status, parking, weather, timings, or emergencies.", "bot");
+        } else {
+            chatWindow.style.display = "none";
+        }
+    };
+
+    sendBtn.onclick = sendMessage;
+    userInput.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") sendMessage();
+    });
+
+    function addMessage(text, sender) {
+        const msg = document.createElement("div");
+        msg.classList.add("msg", sender);
+        const htmlText = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+        msg.innerHTML = htmlText;
+        chatMessages.appendChild(msg);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function sendMessage() {
+        const message = userInput.value.trim();
+        if (!message) return;
+        addMessage("You: " + message, "user");
+        userInput.value = "";
+
+        fetch("http://127.0.0.1:5000/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: message })
+        })
+        .then(res => res.json())
+        .then(data => {
+            addMessage("Mitr: " + data.reply, "bot");
+        })
+        .catch(err => {
+            addMessage("⚠️ Error connecting to server.", "bot");
+        });
+    }
+</script>
+
+</body>
+</html>
