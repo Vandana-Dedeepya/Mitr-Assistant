@@ -167,7 +167,7 @@
         addMessage("You: " + message, "user");
         userInput.value = "";
 
-        fetch("https://mitr-assistant-api.onrender.com", {
+        fetch("https://mitr-assistant-api.onrender.com/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message: message })
