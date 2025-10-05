@@ -4,7 +4,9 @@ import random
 import requests
 
 app = Flask(__name__)
-CORS(app)
+# --- MODIFIED: PERMANENT CORS FIX ---
+# This allows requests from *any* domain (*), ensuring stable connection from GitHub Pages.
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # --------- API Key for Weather ----------
 WEATHER_API_KEY = "26f2e40b06832ee73c89cd38dc56c64d"
@@ -85,12 +87,12 @@ def get_timings(temple="Dwarka"):
 
 def get_greeting():
     return ("🙏 Namaste! I am *Mitr* (मित्र) – your divine assistant. \n\n"
-            "🌸 I provide live updates about 4 sacred temples:<br>"
-            "1️⃣ Somnath Jyotirlinga<br>"
-            "2️⃣ Dwarkadhish Temple<br>"
-            "3️⃣ Ambaji Temple<br>"
-            "4️⃣ Pavagadh Temple<br><br>"
-            "✨ Ask me about crowd status, parking, weather, timings, or emergencies.")
+              "🌸 I provide live updates about 4 sacred temples:<br>"
+              "1️⃣ Somnath Jyotirlinga<br>"
+              "2️⃣ Dwarkadhish Temple<br>"
+              "3️⃣ Ambaji Temple<br>"
+              "4️⃣ Pavagadh Temple<br><br>"
+              "✨ Ask me about crowd status, parking, weather, timings, or emergencies.")
 
 # --------- Chatbot Logic ----------
 def chatbot_response(user_msg):
@@ -147,7 +149,7 @@ def chatbot_response(user_msg):
 
     else:
         return ("🤖 Sorry, I didn’t understand. You can ask about:\n"
-                "- 🚗 Parking\n- 📊 Crowd\n- 🌤️ Weather\n- 🕑 Timings\n- 🗣️ Multilingual Assistant\n- 🚨 Emergencies")
+                  "- 🚗 Parking\n- 📊 Crowd\n- 🌤️ Weather\n- 🕑 Timings\n- 🗣️ Multilingual Assistant\n- 🚨 Emergencies")
 
 # --------- Flask Route ----------
 @app.route("/chat", methods=["POST"])
